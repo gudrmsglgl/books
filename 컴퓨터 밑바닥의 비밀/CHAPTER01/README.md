@@ -1,5 +1,16 @@
 # 프로그래밍 언어부터 프로그램 실행까지, <br>이렇게 진행된다.
 
+목차 <br>
+[프로그래밍 언어를 발명한다면?](#id-section1)<br>
+[1.1.1 창세기: CPU는 똑똑한 바보](#id-section2)<br>
+[1.1.2 어셈블리어 등장](#id-section3)<br>
+[1.1.3 저수준 계층의 세부 사항 대 고수준 계층의 추상화](#id-section4)<br>
+[1.1.4 가득한 규칙: 고급 프로그래밍 언어의 시작](#id-section5)<br>
+[1.1.5 <인셉션>과 재귀: 코드 본질](#id-section6)<br>
+
+
+<div id='id-section1'/>
+  
 ## section1 여러분이 프로그래밍 언어를 발명한다면?
 
 프로그래밍 언어
@@ -7,7 +18,8 @@
 
 
 <br>
-
+<div id='id-section2'/>
+  
 ### 1.1.1 창세기: CPU는 똑똑한 바보
 
 CPU
@@ -20,6 +32,8 @@ CPU
 😰이 때는 프로그래머 CPU에 의지에 따라 직접 0과 1로 구성된 명령어 작성
 
 <br>
+<div id='id-section3'/>
+
 
 ### 1.1.2 어셈블리어 등장
 - 기계어와 해당 특정 작업을 간단하게 대응시켜 <br>기계어를 인간이 읽고 이해할 수 있는 단어와 대응
@@ -37,6 +51,7 @@ mov $0, %eax
 
 
 <br>
+<div id='id-section4'/>
 
 ### 1.1.3 저수준 계층의 세부 사항 대 고수준 계층의 추상화
 - 어셈블리어는 기계어와 마찬가지로 여전히 저수준 언어(low-level language)
@@ -59,6 +74,8 @@ mov $0, %eax
 
 
 <br>
+<div id='id-section5'/>
+
 
 ### 1.1.4 가득한 규칙: 고급 프로그래밍 언어의 시작
 
@@ -94,6 +111,8 @@ func abc:
 
 
 <br>
+<div id='id-section6'/>
+
 
 ### 1.1.5 <인셉션>과 재귀: 코드 본질
 
@@ -154,8 +173,23 @@ f(x)는
 
 ![IMG_0383](https://github.com/user-attachments/assets/89d00ffd-98cf-4043-830a-685d64fa375f)
 
+<br>
+
+### 1.1.8 해석형 언어의 탄생
+
+> 🤮 다양한 CPU
+형식이 다른 CPU는 가각 자신만의 고유한 언어가 있다.
+![IMG_0384](https://github.com/user-attachments/assets/7596b1b5-c855-4beb-9d25-a76dce6b94fb)
 
 
+#### 통합하는 방법은 없을까?
+> 💡 <br>
+CPU는 기계 명령어를 실행하는 존재 <br> 
+=> 직접 표준 명령어 집합을 정의 <br>
+=> CPU의 기계 명령어 실행 과정을 **✌🏻모방✌🏻** 하는 프로그램을 작성하여 사용
+
+가상 머신(virtual machine) 과 인터프리터(interpreter)
+![IMG_0385](https://github.com/user-attachments/assets/0e0357c8-f320-4e57-9420-b2e59d299e65)
 
 
 
