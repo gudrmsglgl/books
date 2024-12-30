@@ -14,8 +14,11 @@
 [Section1.2 컴파일러는 어떻게 작동하는 것일까?](#id-section10)<br>
 - [1.2.1 컴파일러는 그저 일반적인 프로그램일 뿐, 대단하지 않다](#id-section11)<br>
 - [1.2.2 각각의 토큰 추출하기](#id-section12)<br>
-- [1.2.3 ](#id-section13)<br>
-- [1.2.4 ](#id-section14)<br>
+- [1.2.3 토큰이 표현하고자 하는 의미](#id-section13)<br>
+- [1.2.4 생성된 구문 트리에 이상은 없을까?](#id-section14)<br>
+- [1.2.5 구문 트리를 기반으로 중간 코드 생성하기](#id-section15)<br>
+- [1.2.6 코드 생성](#id-section16)<br>
+
 
 
 <div id='id-section1'/>
@@ -261,6 +264,117 @@ while (a < b)
 <div id='id-section12'/>
   
 ### 1.2.2 각각의 토큰 추출하기
+
+
+컴파일러는 먼저 각 항목을 잘게 쪼갬.<br>
+이때 각 항목이 가지고 있는 추가 정보를 함께 묶어서 관리
+> 각 항목에 추가로 정보를 결합한 것을 전문 용어로 **✌🏻토큰(token)✌🏻**
+
+**📌 컴파일러가 하는 첫 번째 작업**
+```bash
+T_keyword       int
+T_Identifier    a
+T_Assign        =
+T_Int           1
+T_Semicolon     ;
+T_keyword       int
+T_Identifier    b
+T_Assign        =
+T_Int           2
+T_Semicolon     ;
+T_While         while
+T_LeftParen     (
+T_Identifier    a
+T_Less          <
+T_Identifier    b
+T_RightParen    )
+T_OpenBrace     {
+T_Identifier    b
+T_Assign        =
+T_Identifier    b
+T_Minus         -
+T_Int           1
+T_Semicolon     ;
+T_CloseBrace    }
+```
+
+각각의 줄은 하나의 토큰을 의미 <br>
+T로 시작하는 왼쪽 열은 토큰 의미 <br>
+오른쪽 열은 각각의 토큰이 가지는 값
+
+> 소소코드에서 토큰 추출하는 과정 => 어휘 분석(lexical analysis)
+
+<br>
+<div id='id-section13'/>
+  
+### 1.2.3 토큰이 표현하고자 하는 의미
+소스 코드가 하나의 토큰으로 바뀜 <br>
+
+> 🧐 컴파일러가 구문 트리에 따라 토큰을 처리한다는 것은 무슨 의미?
+
+컴파일러가 while 키워드 토큰을 찾으면 <br>
+위의 토큰 테이블에서 ( 라는 것을 알고 있는 상태로 기다리게 됨 <br>
+하지만 다음 토큰이 while 키워드에 필요한 토큰이 아니라면, 컴파일러는 문법 오류(syntax error)를 보고 <br>
+반면에 이 과정을 무사히 넘어가면 다음 토큰이 bool 표현식이여야 한다는 것을 알고 기다림 
+> 이러한 과정을 해석 (parsing) 
+
+위의 토큰 테이블로 만든 구조를 어떻게 표현할까? ==> '트리'
+![IMG_0386](https://github.com/user-attachments/assets/9bbcbe16-5cd6-498b-88fa-ba2df15c0aab)
+위 그림이 구문트리이고 <br>
+이 트리를 생성하는 전체 과정을 '구문 분석'
+
+
+<br>
+<div id='id-section14'/>
+  
+### 1.2.4 생성된 구문 트리에 이상은 없을까?
+
+구문 트리가 생성되고 나면 구문 트리에 이상이 없는지 확인해야 된다.<br>
+예를 들어 정수 값에 문자열을 더하면 안 되고, 비교 기호의 좌우에 있는 값 형식이 다르면 안 된다. <br>
+
+이 단계가 지나면 컴파일 오류가 없다는 것이 증명되는데,
+![IMG_0387](https://github.com/user-attachments/assets/a1dc6207-b097-4ba8-b51c-532a93444858)
+이 과정을 의미 분석 (semantic analysis) 라고 함.
+
+<br>
+<div id='id-section15'/>
+  
+### 1.2.5 구문 트리를 기반으로 중간 코드 생성하기
+
+의미 분석이 끝나면 컴파일러는 구문 트리를 탐색한 결과를 바탕으로 <br>
+좀 더 다듬어진 형태인 중간 코드(Intermediate Representation Code, IR Code)를 생성
+
+```bash
+a = 1
+b = 2
+goto B
+A: b = b - 1
+B: if a < b goto A
+```
+어떤 경우에는 중간 코드에 최적화가 진행되기도 함.
+
+<br>
+<div id='id-section16'/>
+  
+### 1.2.6 코드 생성
+이 과정이 완료되면 컴파일러는 앞의 중간 코드 -> 어셈블리어 코드로 변환
+```x86
+    mov1    $0x1, -0x4(%rbp) // a = 1
+    mov1    $0x2, -0x8(%rbp) // b = 2
+    jmp     B                // b로 점프
+A:  sub1    $0x1, -0x8(%rbp) // b = b - 1
+B:  mov     -0x4(%rbp), %eax
+    cmp     -0x8(%rbp), %eax // a < b ?
+    j1      A                // a < b 이면 A로 점프
+```
+
+마지막으로 컴파일러는 이 어셈블리어 코드 -> 기계 명령어로 변환<br>
+이런 방식으로 컴파일러는 인간이 소스 코드라고 불리는 **✌🏻문자열✌🏻**을 CPU가 실행할 수 있는 **🤖기계 명령어**로 번역
+
+여기서 끝이 아니라 우리는 실행 파일을 만드는 것이 목표! <br>
+> 위에서 설명한 기계 명렁어가 된 파일을 .o(object) 대상 파일이 생성되며 <br>
+소스코드 -> 대상파일(N) 개를 
+병합한 실행 파일로 만들어주는 작업 --> 링크(link) <br>
 
 
 ## section3 
