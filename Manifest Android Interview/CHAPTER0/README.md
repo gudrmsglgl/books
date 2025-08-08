@@ -7,6 +7,8 @@
 - [2. What is the purpose of Pending Intent?](#id-section3)<br>
 - [3. What are the differences between Serializable and Parcelable](#id-section4)<br>
 - [4. What is Context and what types of Context exist?](#id-section5)<br>
+- [5. What is Application class?](#id-section6)<br>
+- [6. What is the purpose of the AndroidManifest file?](#id-section7)<br>
 
 <div id='id-section1'/>
   
@@ -441,3 +443,114 @@ val systemService = baseContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE
 - Activity에서 `this`는 현재 액티비티 인스턴스를 가리키며, 생명주기와 UI 관련 기능이 포함된 고수준 컨텍스트를 제공한다.
 - `baseContext`는 액티비티가 기반하는 하위 컨텍스트로, 주로 커스텀 ContextWrapper 구현 등 고급 상황에서 사용된다.
 - 일반적으로 안드로이드 개발에서는 `this`를 많이 사용하지만, `baseContext`의 개념을 이해하면 디버깅이나 모듈화, 재사용성 높은 컴포넌트 개발에 도움이 된다.
+
+<br>
+<div id='id-section6'/>
+
+### 5. What is Application class?
+
+**Application 클래스**는 <br>
+안드로이드에서 앱의 전역 상태와 생명주기를 관리하는 기본 클래스
+
+- 앱의 진입점 역할<br>
+- 액티비티·서비스·브로드캐스트 리시버보다 먼저 초기화
+- 앱 전역 컨텍스트를 제공 > 공용 리소스 초기화에 적합하다.
+
+#### Application 클래스의 목적
+
+- 앱 전체에서 사용할 전역 상태 관리
+- 앱 시작 시점에 라이브러리, 의존성, 공용 리소스 초기화
+- 여러 액티비티/서비스에서 공유해야 하는 데이터나 객체 관리
+
+#### 주요 메서드
+
+- **onCreate()**  
+  앱 프로세스가 생성될 때 호출.  
+  데이터베이스, 네트워크 라이브러리, <br>분석 툴 등 앱 전체에서 필요한 의존성 초기화에 사용  
+  앱 생명주기 동안 한 번만 호출됨
+
+- **onTerminate()**  
+  에뮬레이터 환경에서 앱이 종료될 때 호출.  
+  실제 디바이스에서는 호출되지 않으므로, 종료 처리 로직에 의존하면 안 됨
+
+- **onLowMemory() / onTrimMemory()**  
+  시스템에서 메모리 부족을 감지하면 호출  
+  onLowMemory()는 구버전 API에서 사용<br>onTrimMemory()는 앱의 메모리 상태에 따라 더 세밀하게 대응 가능
+
+#### 참고
+
+- 기본적으로 모든 앱은 Application 클래스를 사용하며, AndroidManifest.xml에 커스텀 클래스를 지정하면 직접 구현 가능
+
+#### Application 클래스의 주요 활용 예시
+
+- **글로벌 리소스 관리:** 데이터베이스, SharedPreferences, 네트워크 클라이언트 등 앱 전체에서 사용할 리소스를 한 번만 설정해 재사용
+- **컴포넌트 초기화:** Firebase Analytics, Timber 등 앱 전역에서 필요한 라이브러리나 툴을 앱 시작 시점에 초기화
+- **의존성 주입:** Dagger, Hilt 같은 프레임워크를 앱 전체에 적용해 의존성 관리
+
+#### Best Practices
+
+- onCreate()에서 오래 걸리는 작업은 피해서 앱 실행 지연을 방지
+- Application 클래스를 불필요한 로직의 집합소로 사용하지 말고, 글로벌 초기화와 리소스 관리에만 집중
+- 공유 리소스 관리 시 스레드 안전성(thread safety) 확보
+
+---
+
+#### 요약 (Summary)
+
+- Application 클래스는 앱 전체에서 사용할 리소스와 설정을 초기화·관리하는 중앙 역할을 한다.
+- 전역 설정에만 집중해 불필요한 복잡성을 피하는 것이 좋다.
+
+---
+
+#### 실전 질문 (Practical Questions)
+
+**Q) Application 클래스의 목적은 무엇이며, 생명주기와 리소스 관리 측면에서 Activity와 어떻게 다른가?**
+
+- Application 클래스는 앱 전체에서 사용할 리소스와 의존성을 초기화하고, 전역 상태를 관리하는 역할을 한다.
+- Application은 앱 프로세스가 시작될 때 한 번만 생성되어 앱이 종료될 때까지 유지된다. 반면, Activity는 화면 단위로 생성·소멸이 반복된다.
+- Application 컨텍스트는 앱 전체에서 사용 가능하며, Activity 컨텍스트는 UI와 생명주기에 종속된다.
+- Application 클래스는 글로벌 리소스 관리와 초기화에 집중하고, Activity는 UI와 사용자 상호작용에 집중한다.
+
+
+
+<br>
+<div id='id-section7'/>
+
+### 6. What is the purpose of the AndroidManifest file?
+
+**AndroidManifest.xml**는 안드로이드 프로젝트에서 앱과 운영체제(OS) 사이의 연결고리 역할을 하는 핵심 설정 파일이다.  
+앱의 구성 요소, 권한, 요구 기능, 메타데이터 등 앱 실행에 필요한 정보를 시스템에 알려준다.
+
+#### 주요 역할
+
+- **앱 컴포넌트 선언:**  
+  액티비티, 서비스, 브로드캐스트 리시버, 콘텐츠 프로바이더 등 앱의 주요 컴포넌트를 등록해 시스템이 실행/연동할 수 있도록 함
+
+- **권한 선언:**  
+  앱이 필요한 권한(INTERNET, ACCESS_FINE_LOCATION, READ_CONTACTS 등)을 명시해, 사용자에게 리소스 접근 여부를 알리고 승인받음
+
+- **하드웨어/소프트웨어 요구사항:**  
+  카메라, GPS, 특정 화면 크기 등 앱이 필요로 하는 기능을 지정해, 플레이스토어에서 지원되지 않는 기기를 필터링
+
+- **앱 메타데이터:**  
+  패키지명, 버전, 최소/타겟 API 레벨, 테마, 스타일 등 앱 설치와 실행에 필요한 기본 정보 제공
+
+- **인텐트 필터:**  
+  컴포넌트가 ✌🏻어떤 인텐트에 반응✌🏻할지 정의(예: 링크 열기, 콘텐츠 공유 등), 다른 앱과의 상호작용 가능
+
+- **앱 설정 및 구성:**  
+  메인 런처 액티비티 지정, 백업 설정, 테마 지정 등 앱의 동작 방식과 UI를 제어하는 설정 포함
+
+
+--- 
+
+#### 실전 질문 (Practical Questions)
+
+**Q) AndroidManifest의 인텐트 필터가 앱 상호작용을 어떻게 가능하게 하며, 액티비티 클래스가 AndroidManifest에 등록되지 않으면 어떻게 되는가?**
+
+- **인텐트 필터**는 AndroidManifest.xml에 컴포넌트(액티비티, 서비스 등)가 어떤 인텐트에 반응할지 정의한다.  
+  이를 통해 외부 앱이나 시스템이 해당 컴포넌트를 호출할 수 있어, 앱 간 상호작용(예: 링크 열기, 공유 등)이 가능해진다.
+- 인텐트 필터가 없으면 암시적 인텐트로 해당 컴포넌트를 실행할 수 없고, 앱의 기능 확장성이 제한된다.
+- **액티비티 클래스가 AndroidManifest에 등록되지 않으면**  
+  시스템이 해당 액티비티를 인식하지 못해, 인텐트로 액티비티를 실행하려고 할 때 `ActivityNotFoundException`이 발생한다.  
+  즉, 앱에서 해당 액티비티를 정상적으로 실행할 수 없다.
