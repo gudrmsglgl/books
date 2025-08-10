@@ -9,6 +9,7 @@
 - [4. What is Context and what types of Context exist?](#id-section5)<br>
 - [5. What is Application class?](#id-section6)<br>
 - [6. What is the purpose of the AndroidManifest file?](#id-section7)<br>
+- [7. Describe the Activity lifecycle](#id-section8)<br>
 
 <div id='id-section1'/>
   
@@ -554,3 +555,133 @@ val systemService = baseContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE
 - **액티비티 클래스가 AndroidManifest에 등록되지 않으면**  
   시스템이 해당 액티비티를 인식하지 못해, 인텐트로 액티비티를 실행하려고 할 때 `ActivityNotFoundException`이 발생한다.  
   즉, 앱에서 해당 액티비티를 정상적으로 실행할 수 없다.
+
+
+<br>
+<div id='id-section8'/>
+
+### 7. Describe the Activity lifecycle
+
+
+안드로이드의 Activity 생명주기는 <br>
+액티비티가 생성부터 소멸까지 거치는 여러 상태를 의미한다.  
+각 상태를 이해하면 리소스 관리, 사용자 입력 처리, 안정적인 앱 동작에 도움이 된다.
+
+#### 주요 단계
+
+- **onCreate()**
+  - 액티비티가 **✌🏻처음 생성✌🏻**될 때 호출
+  - UI 초기화, 컴포넌트 설정, 저장된 상태 복원 등
+  - 생명주기 동안 한 번만 호출(단, 액티비티가 완전히 소멸 후 재생성되면 다시 호출)
+
+- **onStart()**
+  - 액티비티가 사용자에게 **✌🏻보이기 시작✌🏻**할 때 호출(not interaction)
+  - onCreate() 이후, onResume() 이전에 실행
+
+- **onRestart()**
+  - 액티비티가 중지(onStop)됐다가 다시 시작될 때 호출
+  - onStart() 전에 실행
+
+- **onResume()**
+  - 액티비티가 포그라운드에 올라와 사용자와 상호작용 가능한 상태
+  - UI 업데이트, 애니메이션, 입력 리스너 재개 등
+
+- **onPause()**
+  - 다른 액티비티나 다이얼로그가 화면을 일부 가릴 때 호출
+  - 액티비티는 **✌🏻여전히 보이✌🏻**지만 포커스를 잃음
+  - 애니메이션, 센서 업데이트, 데이터 저장 등 일시 중지 작업에 사용
+
+- **onStop()**
+  - 액티비티가 더 이상 사용자에게 보이지 않을 때 호출
+  - 백그라운드 작업, 무거운 리소스 해제 등
+
+- **onDestroy()**
+  - 액티비티가 완전히 소멸되기 직전에 호출
+  - 모든 리소스 정리 및 최종 해제 작업
+
+--- 
+#### 실전 질문 (Practical Questions)
+
+**Q) onPause()와 onStop()의 차이점은 무엇이며, 리소스 집약적인 작업을 처리할 때 각각 어떤 상황에서 사용해야 하나?**
+
+- **onPause()** 는 액티비티가 여전히 화면에 보이지만 포커스를 잃었을 때 호출된다.  
+  예를 들어, 다이얼로그가 뜨거나 다른 액티비티가 부분적으로 화면을 가릴 때 발생한다.  
+  UI 업데이트, 센서, 애니메이션 등 일시적으로 중단해야 하는 작업에 적합하다.
+
+- **onStop()** 은 액티비티가 완전히 화면에서 사라질 때 호출된다.  
+  백그라운드 작업, 네트워크 연결, 무거운 리소스(예: 카메라, 위치 서비스 등) 해제 등  
+  더 오래 중단하거나 해제해야 하는 리소스 집약적 작업에 사용한다.
+
+**정리:**  
+- 짧게 중단할 작업(애니메이션, 센서 등)은 onPause()에서 처리  
+- 화면에서 완전히 사라질 때 해제해야 하는 리소스(네트워크, DB, 서비스 등)는 onStop()에서 처리
+
+--- 
+
+**💡 Pro Tips for Mastery: 여러 Activity 간의 Lifecycle 변화**
+
+두 개의 액티비티(A, B) 사이에서 화면 전환이 일어날 때, 각 액티비티의 생명주기 콜백이 순서대로 호출된다.
+
+#### 순차적 생명주기 흐름
+
+**1. Activity A 최초 실행**
+- Activity A: `onCreate()` → `onStart()` → `onResume()`
+- 사용자가 Activity A와 상호작용
+
+**2. Activity A에서 Activity B로 이동**
+- Activity A: `onPause()` (UI 일시 중지, 리소스 해제)
+- Activity B: `onCreate()` → `onStart()` → `onResume()` (포커스 획득)
+- Activity A: `onStop()` (Activity B가 완전히 화면을 덮으면 호출)
+
+**3. Activity B에서 다시 Activity A로 복귀**
+- Activity B: `onPause()`
+- Activity A: `onRestart()` → `onStart()` → `onResume()` (포커스 재획득)
+- Activity B: `onStop()` → `onDestroy()` (완전히 종료)
+
+#### 요약
+
+- 포그라운드에 있던 액티비티는 항상 `onPause()`를 거쳐 백그라운드로 이동
+- 새로 실행되는 액티비티는 `onCreate()`부터 생명주기가 시작됨
+- 이전 액티비티로 돌아오면 `onRestart()` 또는 `onResume()`을 통해 다시 활성화
+- 나가는 액티비티는 상황에 따라 `onStop()` 또는 `onDestroy()`로 종료됨
+
+이 흐름을 이해하면 리소스 관리와 사용자 경험을 최적화할 수 있다.
+
+--- 
+**💡 Pro Tips for Mastery: Activity의 lifecycle 인스턴스란?**
+
+모든 Activity에는 Jetpack Lifecycle 라이브러리의 Lifecycle 인스턴스가 연결
+- ComponentActivity 에서 Lifecycle 인스턴스 가져올 수 있음
+
+이 인스턴스를 통해 직접 오버라이드하지 않고
+(LifecycleObserver, DefaultLifecycleObserver)를 등록해 <br>
+구조적으로 관리할 수 있다.
+
+#### 사용 방법
+
+- Lifecycle 인스턴스에 Observer를 추가해, 특정 생명주기 상태에서 원하는 작업을 수행할 수 있다.
+
+```kotlin
+class MyObserver : DefaultLifecycleObserver {
+    override fun onStart(owner: LifecycleOwner) { /* ... */ }
+    override fun onStop(owner: LifecycleOwner) { /* ... */ }
+}
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        lifecycle.addObserver(MyObserver())
+    }
+}
+```
+
+#### 주요 장점
+
+- **라이프사이클 인식:** 컴포넌트가 액티비티의 현재 상태를 인식해, 불필요하거나 잘못된 작업을 방지
+- **관심사 분리:** 생명주기 의존 로직을 액티비티 밖으로 분리해 코드 가독성·유지보수성 향상
+- **Jetpack 라이브러리 연동:** LiveData, ViewModel 등과 쉽게 통합해, 반응형 프로그래밍과 효율적 리소스 관리 가능
+
+#### 요약
+
+- Lifecycle 인스턴스는 현대 안드로이드 아키텍처의 핵심으로,  
+  구조적이고 재사용 가능한 방식으로 생명주기 이벤트를 처리할 수 있게 해준다.
